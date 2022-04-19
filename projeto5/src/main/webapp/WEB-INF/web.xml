@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+   http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+
+	<display-name>Blog</display-name>
+	<description>Sample Blog class</description>
+
+	<!-- Mapeando a classe do Servlet para o apelido -->
+	<servlet>
+		<servlet-name>apelido</servlet-name>
+		<servlet-class>br.com.mariojp.blog.IndexServlet</servlet-class>
+	</servlet>
+    
+    
+    <!-- Mapeando o recurso para a url /index2 -->
+    <servlet-mapping>
+    	<servlet-name>apelido</servlet-name>
+		<url-pattern>/index2</url-pattern>
+    </servlet-mapping>
+    
+</web-app>
