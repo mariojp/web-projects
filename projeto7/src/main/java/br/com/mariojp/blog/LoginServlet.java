@@ -1,8 +1,9 @@
-package br.com.mariojp.blog.controllers;
+package br.com.mariojp.blog;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
+
+import javax.security.auth.login.FailedLoginException;
+
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -22,9 +23,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoginServlet extends HttpServlet{
 
 	private static final long serialVersionUID = 1L;
-
+	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		
 		String usuario = request.getParameter("usuario");		
 		String senha = request.getParameter("senha");		
@@ -52,8 +54,6 @@ public class LoginServlet extends HttpServlet{
 			
 			
 		}
-						
-		
 	
 	}
 	

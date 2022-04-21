@@ -1,4 +1,4 @@
-package br.com.mariojp.blog.controllers;
+package br.com.mariojp.blog;
 
 import java.io.IOException;
 import java.util.Map;

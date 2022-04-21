@@ -456,3 +456,236 @@ Run on server...
 Acessos: 
 - http://localhost:8080/blog/index.jsp
 - http://localhost:8080/blog/login.jsp
+
+
+
+>## PROJETO 7:
+No projeto anterior temos uma tela de login.jsp um dashboard.jsp e um index.jsp todos estão dentro do ```/src/main/webapps/``` e por isso podem ser acessados pelo navegador e esses recursos estão mapeados pelo proprio nome do arquivo. Em ```src/main/java/ temos os Sevlets ```IndexServlet.java``` e ```LoginServlet.java```mapeados pela anotação ```@WebServlet``` como ```/index```e ```/login``` respectivamente. Outra coisa que é possivel observar é que os arquivos ```.jsp```respondem a HTTP GET e a HTTP Post não fazendo uma distinção, já os Servlets voce pode definir o metodo ```doPost``` para atender a requisições HTTP POST e ou o metodo ```doGet``` para atender as requisições do tipo HTTP GET.
+
+>Para garantir que só alguem altenticado acesse ao dashboard.jsp poderiamos adicionar ao arquivo um codigo que testa se existe um usuario na session e caso não exista ele redireciona para o login.jsp:
+
+```java
+<%
+String usuario = (String) session.getAttribute("usuario");
+if(usuario == null){
+	response.sendRedirect("./login");
+}
+%>
+```
+
+ou uma versão melhorada (JSTL e EL) :
+
+```html
+<c:if test="${usuario == null}">
+	<c:redirect url="/login.jsp" />
+</c:if>
+```
+
+Isso não é legal porque voce precisaria fazer isso em todos os jsp e Servlets onde precisa checar se existe usuario autenticado (ou seja se ele está na session).
+
+Vamo a uma solução, podemos usar um ```Filter``` 
+
+>Filter é um objeto que pode transformar o cabeçalho e o conteúdo (ou ambos) de um request ou response. Os filtros geralmente não criam um response. Os filtro fornecem funcionalidades que pode ser “transversais” a qualquer tipo de recurso da web.  As principais tarefas que um filtro pode realizar são as seguintes:
+>
+>-Verificar o request e tomar uma ação.
+>
+>-Bloquear uma requisição.
+>
+>-Modificar os cabeçalhos e dados da requisição.
+>
+>-Modifique os cabeçalhos e dados de resposta.
+>
+>- Interagir com recursos externos.
+>
+>Os filtros podem ser aplicados para: autenticação, registro em log, conversão de imagem, compactação de dados, criptografia, fluxos de tokenização, transformações XML e assim por diante.
+
+Então vamo criar um filtro para verificar se existe usuario autenticado.
+- AutenticacaoFilter.java
+```java
+@WebFilter("/dashboard.jsp")
+public class AutenticacaoFilter extends HttpFilter {
+    
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		HttpServletRequest httpRequest = (HttpServletRequest) request; 
+		HttpServletResponse httpResponse = (HttpServletResponse) response; 	
+		Object usuario = httpRequest.getSession().getAttribute("usuario");
+		if(usuario == null ) {
+			httpResponse.sendRedirect("./login.jsp");
+		}else {
+			// passar a requisição adiante 
+			chain.doFilter(request, response);
+		}
+		
+	}
+}
+```
+
+Então toda vez que uma requisição for efetuada para o recurso ```@WebFilter("/dashboard.jsp")``` o filtro vai capturar e testar. Se ```usuario == null``` então ele vai redirecionar para ```login.jsp```, senão ele da continuidade a requisição.
+
+
+Run on server...
+
+Acessos: 
+- http://localhost:8080/blog/index.jsp
+- http://localhost:8080/blog/login.jsp
+
+>## PROJETO 8:
+Vamos agora nos voltar para o negocio a organização do projeto, nosso objetivo é ter um blog. Vamos adotar uma empacotamento baseado em **camadas ou layers**.
+
+A estrutura de pacotes baseada em camadas:
+
+```ascii
+java
+|-- br
+	`-- com
+    	`-- mariojp
+    	   	`-- blog
+       		   	`-- controller
+				|-- model
+    			|-- repository
+				|-- service
+				|-- filter
+				|-- util
+```
+
+> Controller (controller) o objetivo desse pacote é conter todos os Servlets que vão reprensentar controllers. Deste modo, toda requisição criada pelo usuário deve passar pelo controller, e este então se comunica com o model.
+
+> Model (model): a funcão desse pacote é reperentar o modelo de negocio. As classes desse pacote é responsável por manter e lidar com as informações.
+
+> Repository: pacote vai conter as classes que fazem acesso ao banco de bados ou outra forma de armazenamento dos dados.
+
+> Service: nesse pacote estão as classes que vão conter as regras de negocio.
+
+> Filter: pacote onde colocamos os as classes que tem as funcionalidades ligadas a FIlters
+
+> Util; nomalmente um pacote onde podemos colocar classes com funções de biblioteca ou generias que serão usadas e que não se encaixam nas outras especificações.
+
+Um parenteses 
+
+(
+
+Vale apena se aprofundar mas vou só levantar a questão.
+
+Model View Controller (MVC) e Camadas não são a mesma coisa.
+
+>Estilos arquiteturais referem-se a uma terminologia que caracteriza, através aparência estética, componentes de software cujo o design seja notável e identificável a partir de uma visão do nível mais alto de abstração. Quando definimos o estilo arquitetural de nosso software estamos interessados em prever como as camadas e módulos irão comunicar-se, identificando e isolando suas responsabilidades. Existem diferentes tipos de estilos arquiteturais, podendo ainda serem combinados produzindo estilos híbridos adicionais.
+
+> Padrões arquiteturais possuem natureza conceitual, sendo aplicados com flexibilidade variando seu nível de granularidade em seu escopo de aplicação. A diferença entre estilos e padrões arquiteturais ocorre no escopo do problema a ser resolvido.
+
+)
+
+Voltando ao codigo:
+
+Distribui as classes que já existiam no pacote de controller. Criei a classe ``` Usuario.java``` no pacote model. 
+
+```java
+public class Usuario {
+	
+	private String login;
+	
+	private String password;
+	
+	//get's e set's omitidos
+
+}
+```
+
+Criei tambem uma classe ```UsuarioDAO.java```  para representar a persistencia dos objetos.
+
+```java
+public class UsuarioDAO {
+	//Abstração de uma "tabela de usuarios"
+	private static Map<String,Usuario> usuarios = new HashMap<String,Usuario>();
+	//uma estrategia para que sempre que essa classe crie um suario 
+	//login: root e senha: 1234
+	static {
+		if(usuarios.isEmpty()) {
+			Usuario usuario = new Usuario();
+			usuario.setLogin("root");
+			usuario.setPassword("1234");
+			usuarios.put(usuario.getLogin(), usuario);
+		}
+	}
+	
+	public List<Usuario> findAll(){ ... }
+	
+	public Usuario save(Usuario usuario) { ... }
+	
+	public Usuario findByLogin(String login) { ... }
+	
+	public Usuario delete{ ... }
+	
+```
+
+Classe ```UsuarioService.java``` que vai conter as regras de negocio.
+
+```java
+
+```
+
+As demais classes foram um Filtro para Verificar se esta autenticado os servlets para todas as requisições.
+
+O projeto agora tem tambem novos arquivos JSP e alguns que não devem ser acessados sem autenticação como ```usuarios.jsp```que possui a lista de usuarios ou ```usuarioform.jsp``` que é o formulario para adicionar um novo usuario ou editar um usuario existente. 
+Então o filtro ficaria algo assim:
+```java
+@WebFilter(urlPatterns = {"/dashboard.jsp", "/usuarios.jsp","/usuarioform.jsp"})
+```
+Não me me parece uma boa ideia, porque sempre que há que sugir um novo jsp ou servlet devemos adicionar ao mapeamento. Uma opção é criar uma pasta  ```webapp\autenticado\``` e colocar todos os recursos onde seja necessario estar autenticado (jsp) lá. Nosso filtro passaria a ter esse formato:
+
+```java
+@WebFilter(urlPatterns = "/autenticado/*")
+```
+
+Nesse caso os servelts que necessitam de autenticação também teriam que ter ```autenticado``` em seu mapeamento. Exemplo:
+
+```java 
+@WebServlet("/autenticado/usuario/alterar")
+public class UsuarioEditarServlet extends HttpServlet{ ... }
+```
+
+Outra coisa muito comum de se encontrar em algumas aplicações é colocar os jsp dentro da pasta ```webapp\WEB-INF```, nesse caso os arquivos lá não são mais acessiveis externamente, ou seja, não há mais mapeamento direto pela url. Nesse caso é necessario o acesso via Servlet usando o ```forward``` e o jsp assume claramente o papel de view/template.
+
+Vamos adotar essa abordagem e para que nossa pagina inicial não fique com 404 ao colocar o index.jsp dentro do ```WEB-INF``` vamos adicionar ao web.xml um welcome file para nosso servlet inicial.
+
+```webapp\WEB-INF\web.xml```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+   http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+
+	<display-name>Blog</display-name>
+	<description>Sample Blog class</description>
+
+    <welcome-file-list>
+    	<welcome-file>index</welcome-file>
+    </welcome-file-list>
+    
+</web-app>
+```
+
+IndexServlet.java
+```java
+@WebServlet("/index")
+public class IndexServlet extends HttpServlet {
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/index.jsp");			
+		requestDispatcher.forward(request, response);
+	}
+
+}
+```
+
+Agora temo como criar usuarios e alterar seus dados.
+
+>## PROJETO 9:
+Adicionar Banco de Dados, Post e comentarios
+
+
+>## PROJETO 10:
+Adicionar Bootstrap
+
+

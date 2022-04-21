@@ -4,14 +4,16 @@
 <html>
     <head>
         <meta charset="UTF-8"/>
-    </head>
+   </head>
 <body>
-	<h1>HOME</h1>
-	<a href="./login.jsp" >LOGIN</a>
-  	
+
+
+	<h1>DASHBOARD</h1>
+
+	Bem vindo, ${usuario.login}!
+	<br>
 	
-	
-	
-	  	
+	<a href="/blog/autenticado/usuario/listar">Lista de Usuarios</a>
+  
 </body>
 </html>

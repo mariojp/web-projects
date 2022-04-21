@@ -8,6 +8,9 @@ package br.com.mariojp.blog.model;
  */
 public class Usuario {
 	
+	
+	private Integer id;
+	
 	private String login;
 	
 	private String password;
@@ -29,8 +32,17 @@ public class Usuario {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	
-	
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+
+
+
 
 }

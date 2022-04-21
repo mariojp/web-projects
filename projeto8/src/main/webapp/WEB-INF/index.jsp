@@ -7,11 +7,7 @@
     </head>
 <body>
 	<h1>HOME</h1>
-	<a href="./login.jsp" >LOGIN</a>
-  	
 	
-	
-	
-	  	
+	<a href="<c:url value="/login" />">LOGIN</a><br>
 </body>
 </html>
