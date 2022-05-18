@@ -682,10 +682,17 @@ public class IndexServlet extends HttpServlet {
 Agora temo como criar usuarios e alterar seus dados.
 
 >## PROJETO 9:
-Adicionar Banco de Dados, Post e comentarios
+Adicionar Banco de Dados JDBC
+TODO: Adicionar Post e comentarios
 
 
 >## PROJETO 10:
 Adicionar Bootstrap
+TODO: Adicionar Post e comentarios
 
 
+>## PROJETO 11:
+Alterar para empacotamento por funcionalidades by feature
+
+>## PROJETO 12:
+Colocar tomcat embarcado e rodar no heroku
