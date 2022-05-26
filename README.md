@@ -696,3 +696,20 @@ Alterar para empacotamento por funcionalidades by feature
 
 >## PROJETO 12:
 Colocar tomcat embarcado e rodar no heroku
+
+>## PROJETO 13:
+spring-boot Controller
+
+>## PROJETO 14:
+spring-boot RestController
+
+>## PROJETO 15:
+spring-boot thymeleaf
+
+>## PROJETO 16:
+spring-boot spring-data
+
+
+
+
+
